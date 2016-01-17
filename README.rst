@@ -25,7 +25,7 @@ Main Features
 Requirements
 ------------
 
-* `Python 3.4 <https://www.python.org/download/releases/3.4.1/>`__
+* `Python 3 <https://www.python.org>`__
 * `pthreads
   <http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/pthread.h.html>`__
   (tested on Linux and Mac OS X Yosemite)
@@ -55,14 +55,14 @@ Make sure you have installed the packages in `Requirements`_.
 Mac OS X
 ~~~~~~~~
 The easiest way to use this toolbox is to install `Anaconda
-<http://continuum.io/downloads>`__ for Python 3.4, which includes all the
+<http://continuum.io/downloads>`__ for Python 3, which includes all the
 necessary packages in `Requirements`_, except for PyQt5 and CVXOPT. Once you
 have installed Anaconda, create an environment:
 
 .. code:: bash
 
-    $ conda create -n py34 python=3.4 anaconda
-    $ source activate py34
+    $ conda create -n py3 python=3.5 anaconda
+    $ source activate py3
     $ conda update --all
 
 and install `enzpy`:
