@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ ! -f cfg.h5 ]; then
+	# configuration (image size, number of aberrations, ...)
+	./config.py cfg.h5
+	# make ENZPL problem for this configuration
+	./enzpl.py cfg.h5
+fi
+
+# run aberration correction simulation
+./simulation.py cfg.h5
