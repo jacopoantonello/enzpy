@@ -61,9 +61,8 @@ have installed Anaconda, create an environment:
 
 .. code:: bash
 
-    $ conda create -n py3 python=3.5 anaconda
+    $ conda create -n py3 python=3 anaconda
     $ source activate py3
-    $ conda update --all
 
 and install `enzpy`:
 
@@ -74,10 +73,7 @@ and install `enzpy`:
     $ python setup.py install
 
 PyQt5 is necessary to run the examples with a graphical interface:
-:code:`./alpha_abs.py` and :code:`./alpha_abs_qt.py`. This is not supported yet
-out of the box in Anaconda, see `a
-<http://stackoverflow.com/questions/25468397>`__ and `b
-<https://github.com/ContinuumIO/anaconda-issues/issues/138>`__.
+:code:`alpha_abs.py` and :code:`alpha_abs_qt.py`.
 
 
 Examples
@@ -86,26 +82,26 @@ Examples
 After installing `enzpy`, you can run the examples located in `examples/`
 (some screenshots are `here <http://www.antonello.org/code.php>`__):
 
-* :code:`./through_focus_intensity.py` is taken from [ENZ]_, and computes the
+* :code:`through_focus_intensity.py` is taken from [ENZ]_, and computes the
   intensity as a function of the radial coordinate and the defocus parameter.
-* :code:`./psf_plot.py` plots a diffraction-limited **PSF** at different
+* :code:`psf_plot.py` plots a diffraction-limited **PSF** at different
   defocus planes.
-* :code:`./phase_plot.py` plots the first 10 real-valued Zernike polynomials.
-* :code:`./fit_phase.py` estimates a vector of real-valued Zernike coefficients
+* :code:`phase_plot.py` plots the first 10 real-valued Zernike polynomials.
+* :code:`fit_phase.py` estimates a vector of real-valued Zernike coefficients
   from a phase grid by taking inner products numerically.
-* :code:`./fit_gpf` estimates a vector of real-valued Zernike coefficients
+* :code:`fit_gpf` estimates a vector of real-valued Zernike coefficients
   from a phase grid by taking inner products numerically. The coefficients can
   be used to approximate the generalised pupil function.
-* :code:`./beta_abs.py` and :code:`./beta_abs_qt.py` plot the point-spread
+* :code:`beta_abs.py` and :code:`beta_abs_qt.py` plot the point-spread
   function that corresponds to a given complex-valued Zernike analysis of the
   generalised pupil function. The coefficients can be adjusted using the
-  command line (:code:`./beta_abs.py`) or a `Qt` widget
-  (:code:`./beta_abs_qt.py`).
-* :code:`./alpha_abs.py` and :code:`./alpha_abs_qt.py` plot the point-spread
+  command line (:code:`beta_abs.py`) or a `Qt` widget
+  (:code:`beta_abs_qt.py`).
+* :code:`alpha_abs.py` and :code:`alpha_abs_qt.py` plot the point-spread
   function that corresponds to a given real-valued Zernike analysis of the
   phase aberration function. The coefficients can be adjusted using the command
-  line (:code:`./alpha_abs.py`) or a `Qt` widget (:code:`./alpha_abs_qt.py`).
-* :code:`./enzpl/run` contains an example of the **ENZPL** algorithm, which
+  line (:code:`alpha_abs.py`) or a `Qt` widget (:code:`alpha_abs_qt.py`).
+* :code:`enzpl/run` contains an example of the **ENZPL** algorithm, which
   uses **PhaseLift** (see [C2013]_) and the **ENZ** theory to correct a
   random aberration.
 
@@ -120,7 +116,7 @@ Alternatively, you can execute the consistency tests:
 References
 ----------
 
- .. [W1] http://www.antonello.org/code.php
+ .. [W1] http://www.antonello.org
  .. [ENZ] http://www.nijboerzernike.nl/
  .. [J2002] A. J. E. M. Janssen, "Extended Nijboer–Zernike approach for the
     computation of optical point-spread functions," J. Opt. Soc. Am. A 19,
