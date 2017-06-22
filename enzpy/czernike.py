@@ -821,7 +821,7 @@ class FitZern:
             self, filename, prepend=None,
             params=HDF5_options, libver='latest'):
         """Save object into an HDF5 file."""
-        f = h5py.File(filename, 'w', prepend=prepend, libver=libver)
+        f = h5py.File(filename, 'w', libver=libver)
         self.save_h5py(f, prepend=prepend, params=params)
         f.close()
 
