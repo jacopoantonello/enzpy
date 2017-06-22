@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 # enzpy - Extended Nijboer-Zernike implementation for Python
 # Copyright 2016 J. Antonello <jack@antonello.org>

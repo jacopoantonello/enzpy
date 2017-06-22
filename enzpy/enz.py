@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 """Complex point-spread function using the Extended Nijboer-Zernike theory.
 
