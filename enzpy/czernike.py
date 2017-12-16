@@ -26,6 +26,7 @@
 import numpy as np
 import h5py
 
+from numpy.linalg import lstsq
 from math import factorial
 
 
@@ -346,6 +347,58 @@ class Zern:
         assert(a.size == self.ZZ.shape[1])
         return np.dot(self.ZZ, a)
 
+    def fit_cart_grid(self, Phi):
+        """Fit a cartesian grid using least-squares.
+
+        Parameters
+        ----------
+        - `Phi`: cartesian grid, e.g., generated with make_cart_grid().
+
+        Returns
+        -------
+        -   `a`, `numpy` vector of Zernike coefficients
+        -   `res`, see `lstsq`
+        -   `rnk`, see `lstsq`
+        -   `sv`, see `lstsq`
+
+        Examples
+        --------
+
+        .. code:: python
+
+            import numpy as np
+            import matplotlib.pyplot as p
+            from enzpy.czernike import RZern
+
+            cart = RZern(6)
+            L, K = 200, 250
+            ddx = np.linspace(-1.0, 1.0, K)
+            ddy = np.linspace(-1.0, 1.0, L)
+            xv, yv = np.meshgrid(ddx, ddy)
+            cart.make_cart_grid(xv, yv)
+
+            c0 = np.random.normal(size=cart.nk)
+            Phi = cart.eval_grid(c0).reshape((L, K), order='F')
+            c1 = cart.fit_cart_grid(Phi)[0]
+            p.figure(1)
+            p.subplot(1, 2, 1)
+            p.imshow(Phi, origin='lower')
+            p.axis('off')
+            p.subplot(1, 2, 2)
+            p.plot(range(1, cart.nk + 1), c0, marker='.')
+            p.plot(range(1, cart.nk + 1), c1, marker='.')
+
+            p.show()
+
+        """
+        zfm = np.isfinite(self.ZZ[:, 0])
+        zfA = self.ZZ[zfm, :]
+        Phi1 = (Phi.ravel(order='F'))[zfm]
+
+        a, res, rnk, sv = lstsq(np.dot(zfA.T, zfA), np.dot(zfA.T, Phi1))
+
+        return a, res, rnk, sv
+
     def make_pol_grid(self, rho_j, theta_i):
         r"""Make a polar grid to evaluate the Zernike polynomials.
 
@@ -418,7 +471,7 @@ class Zern:
         try:
             params['data'] = self.ZZ
             f.create_dataset(prefix + 'ZZ', **params)
-        except:
+        except AttributeError:
             pass
 
     @classmethod
@@ -451,7 +504,7 @@ class Zern:
         z.numpy_dtype = f[prefix + 'numpy_dtype'].value
         try:
             z.ZZ = f[prefix + 'ZZ'].value
-        except:
+        except ValueError:
             pass
 
         return z
