@@ -6,7 +6,7 @@
 """
 
 # enzpy - Extended Nijboer-Zernike implementation for Python
-# Copyright 2016 J. Antonello <jack@antonello.org>
+# Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
 #
 # This file is part of enzpy.
 #
@@ -579,19 +579,19 @@ class CPsf:
         try:
             params['data'] = self.Ugrid
             f.create_dataset(prefix + 'Ugrid', **params)
-        except:
+        except ValueError:
             pass
 
         try:
             params['data'] = self.Vnm
             f.create_dataset(prefix + 'Vnm', **params)
-        except:
+        except ValueError:
             pass
 
         try:
             params['data'] = self.Cnm
             f.create_dataset(prefix + 'Cnm', **params)
-        except:
+        except ValueError:
             pass
 
         self.czern.save_h5py(f, prepend=prepend)
@@ -618,15 +618,15 @@ class CPsf:
 
         try:
             z.Ugrid = f[prefix + 'Ugrid'].value
-        except:
+        except ValueError:
             pass
         try:
             z.Vnm = f[prefix + 'Vnm'].value
-        except:
+        except ValueError:
             pass
         try:
             z.Cnm = f[prefix + 'Cnm'].value
-        except:
+        except ValueError:
             pass
 
         return z

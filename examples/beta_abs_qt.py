@@ -159,7 +159,7 @@ class Controls(QtWidgets.QWidget):
             try:
                 rl = float(edits1[i].text())
                 im = float(edits2[i].text())
-            except:
+            except BaseException:
                 rl = 0.0
                 im = 0.0
 

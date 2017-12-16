@@ -112,7 +112,7 @@ if __name__ == '__main__':
         try:
             k = nmlist.index(tuple(args.nm))
             alpha[k] = args.rms
-        except:
+        except BaseException:
             print('Cannot find indeces ' + str(args.nm))
             print('Possible [n, m] indeces are:')
             print(nmlist)
@@ -122,7 +122,7 @@ if __name__ == '__main__':
     if args.noll != -1:
         try:
             alpha[args.noll - 1] = args.rms
-        except:
+        except BaseException:
             print('Cannot set the required Noll index k.')
             print('Index k must be between 1 and ' + str(alpha.size))
             sys.exit(1)

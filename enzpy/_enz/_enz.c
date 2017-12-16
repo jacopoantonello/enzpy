@@ -1,6 +1,6 @@
 /*
  * enzpy - Extended Nijboer-Zernike implementation for Python
- * Copyright 2016 J. Antonello <jack@antonello.org>
+ * Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
  *
  * This file is part of enzpy.
  *
@@ -26,7 +26,7 @@
 
 
 #define __ENZPY__AUTHOR__ "Jacopo Antonello"
-#define __ENZPY__COPYRIGHT__ "Copyright 2016, Jacopo Antonello"
+#define __ENZPY__COPYRIGHT__ "Copyright 2018, Jacopo Antonello"
 #define __ENZPY__LICENSE__ "GPLv3+"
 #define __ENZPY__VERSION__ "1.0.0"
 #define __ENZPY__EMAIL__ "jack@antonello.org"

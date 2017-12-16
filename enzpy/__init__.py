@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 __author__ = 'Jacopo Antonello'
-__copyright__ = 'Copyright 2016, Jacopo Antonello'
+__copyright__ = 'Copyright 2018, Jacopo Antonello'
 __license__ = 'GPLv3+'
-__version__ = '1.0.0'
+__version__ = '1.0.2'
 __email__ = 'jack@antonello.org'
 __status__ = 'Production'
 __all__ = ['enz', 'czernike']

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # enzpy - Extended Nijboer-Zernike implementation for Python
-# Copyright 2016 J. Antonello <jack@antonello.org>
+# Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
 #
 # This file is part of enzpy.
 #
@@ -192,6 +192,7 @@ def plot_step(r):
     p.grid()
     nr = norm(r['alpha_res'])
     p.title('real {:.3f}'.format(nr))
+
 
 if len(mr) == 3:
     if args.plot_steps:

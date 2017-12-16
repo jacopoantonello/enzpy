@@ -173,7 +173,7 @@ class Controls(QtWidgets.QWidget):
         for i in range(len(edits1)):
             try:
                 a = float(edits1[i].text())
-            except:
+            except BaseException:
                 a = 0.0
 
             alpha[i] = a

@@ -45,13 +45,13 @@ if __name__ == '__main__':
     print('field1 {:.6f} sec'.format(t2 - t1))
 
     field1 = np.squeeze(field1)
-    I = np.square(np.abs(field1))
-    I *= (1/I.max())
+    I1 = np.square(np.abs(field1))
+    I1 *= (1/I1.max())
 
     ff, rr = np.meshgrid(np.real(fspace), rspace)
     levels = np.sort(np.concatenate((
         np.array([0.025, 0.05]), np.arange(0, 1, 0.1))))
-    c = p.contour(ff, rr, I, levels)
+    c = p.contour(ff, rr, I1, levels)
     p.clabel(c, inline=1)
     p.xlabel('Focus [um]')
     p.ylabel('Radius [um]')
