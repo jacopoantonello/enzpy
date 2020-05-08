@@ -4,8 +4,8 @@
 __author__ = 'Jacopo Antonello'
 __copyright__ = 'Copyright 2018, Jacopo Antonello'
 __license__ = 'GPLv3+'
-__version__ = '1.0.2'
-__email__ = 'jack@antonello.org'
+__version__ = '1.0.3'
+__email__ = 'jacopo@antonello.org'
 __status__ = 'Production'
 __all__ = ['enz', 'czernike']
 __doc__ = """

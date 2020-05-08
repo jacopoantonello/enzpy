@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# enzpy - Extended Nijboer-Zernike implementation for Python
-# Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
-#
 # This file is part of enzpy.
 #
 # enzpy is free software: you can redistribute it and/or modify
@@ -19,26 +16,23 @@
 # You should have received a copy of the GNU General Public License
 # along with enzpy.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
 import time
+
 import h5py
+import numpy as np
 
 from enzpy import enz
-from enzpy.czernike import RZern, FitZern
+from enzpy.czernike import FitZern, RZern
 from enzpy.enz import CPsf
 
 
 class Config:
-
     def __init__(self):
         pass
 
-    def make(
-            self, wavelength, aperture_radius, focal_length, pixel_size,
-            image_width, image_height,
-            n_alpha, n_beta,
-            fit_L, fit_K,
-            focus_positions):
+    def make(self, wavelength, aperture_radius, focal_length, pixel_size,
+             image_width, image_height, n_alpha, n_beta, fit_L, fit_K,
+             focus_positions):
 
         self.wavelength = wavelength
         self.aperture_radius = aperture_radius
@@ -54,15 +48,13 @@ class Config:
 
         self.focus_positions = np.array(focus_positions)
 
-        fu = enz.get_field_unit(
-            wavelength,
-            aperture_radius, focal_length)
+        fu = enz.get_field_unit(wavelength, aperture_radius, focal_length)
 
         def make_space(w, p, fu):
             if w % 2 == 0:
-                return np.linspace(-(w/2 - 0.5), w/2 - 0.5, w)*p/fu
+                return np.linspace(-(w / 2 - 0.5), w / 2 - 0.5, w) * p / fu
             else:
-                return np.linspace(-(w - 1)/2, (w - 1)/2, w)*p/fu
+                return np.linspace(-(w - 1) / 2, (w - 1) / 2, w) * p / fu
 
         # image side space
         xspace = make_space(image_width, pixel_size, fu)
@@ -83,24 +75,23 @@ class Config:
 
         # make phase polar grid
         t1 = time.time()
-        self.phase_grid.make_pol_grid(
-            self.phase_fit.rho_j,
-            self.phase_fit.theta_i)
+        self.phase_grid.make_pol_grid(self.phase_fit.rho_j,
+                                      self.phase_fit.theta_i)
         t2 = time.time()
         print('make phase pol grid {:.6f}'.format(t2 - t1))
 
         # make gpf polar grid (Zernike approximation)
         t1 = time.time()
-        self.cpsf.czern.make_pol_grid(
-            self.phase_fit.rho_j,
-            self.phase_fit.theta_i)
+        self.cpsf.czern.make_pol_grid(self.phase_fit.rho_j,
+                                      self.phase_fit.theta_i)
         t2 = time.time()
         print('make gpf pol grid {:.6f}'.format(t2 - t1))
 
         # make cpsf cart grid
         t1 = time.time()
-        self.cpsf.make_cart_grid(
-            x_sp=xspace, y_sp=yspace, f_sp=focus_positions)
+        self.cpsf.make_cart_grid(x_sp=xspace,
+                                 y_sp=yspace,
+                                 f_sp=focus_positions)
         t2 = time.time()
         print('make cpsf cart grid {:.6f}'.format(t2 - t1))
 
@@ -126,45 +117,35 @@ class Config:
             'compression_opts': 9,
         }
 
-        f.create_dataset(
-            prefix + 'wavelength',
-            data=np.array([self.wavelength], dtype=np.float))
+        f.create_dataset(prefix + 'wavelength',
+                         data=np.array([self.wavelength], dtype=np.float))
 
-        f.create_dataset(
-            prefix + 'aperture_radius',
-            data=np.array([self.aperture_radius], dtype=np.float))
+        f.create_dataset(prefix + 'aperture_radius',
+                         data=np.array([self.aperture_radius], dtype=np.float))
 
-        f.create_dataset(
-            prefix + 'focal_length',
-            data=np.array([self.focal_length], dtype=np.float))
+        f.create_dataset(prefix + 'focal_length',
+                         data=np.array([self.focal_length], dtype=np.float))
 
-        f.create_dataset(
-            prefix + 'image_width',
-            data=np.array([self.image_width], dtype=np.int))
+        f.create_dataset(prefix + 'image_width',
+                         data=np.array([self.image_width], dtype=np.int))
 
-        f.create_dataset(
-            prefix + 'image_height',
-            data=np.array([self.image_height], dtype=np.int))
+        f.create_dataset(prefix + 'image_height',
+                         data=np.array([self.image_height], dtype=np.int))
 
-        f.create_dataset(
-            prefix + 'pixel_size',
-            data=np.array([self.pixel_size], dtype=np.float))
+        f.create_dataset(prefix + 'pixel_size',
+                         data=np.array([self.pixel_size], dtype=np.float))
 
-        f.create_dataset(
-            prefix + 'n_alpha',
-            data=np.array([self.n_alpha], dtype=np.int))
+        f.create_dataset(prefix + 'n_alpha',
+                         data=np.array([self.n_alpha], dtype=np.int))
 
-        f.create_dataset(
-            prefix + 'n_beta',
-            data=np.array([self.n_beta], dtype=np.int))
+        f.create_dataset(prefix + 'n_beta',
+                         data=np.array([self.n_beta], dtype=np.int))
 
-        f.create_dataset(
-            prefix + 'fit_L',
-            data=np.array([self.fit_L], dtype=np.int))
+        f.create_dataset(prefix + 'fit_L',
+                         data=np.array([self.fit_L], dtype=np.int))
 
-        f.create_dataset(
-            prefix + 'fit_K',
-            data=np.array([self.fit_K], dtype=np.int))
+        f.create_dataset(prefix + 'fit_K',
+                         data=np.array([self.fit_K], dtype=np.int))
 
         params['data'] = self.focus_positions
         f.create_dataset(prefix + 'focus_positions', **params)
@@ -175,9 +156,9 @@ class Config:
         params['data'] = self.yspace
         f.create_dataset(prefix + 'yspace', **params)
 
-        self.phase_fit.save_h5py(f, prepend=prefix+'phase_fit/')
-        self.cpsf.save_h5py(f, prepend=prefix+'cpsf/')
-        self.gpf_fit.save_h5py(f, prepend=prefix+'gpf_fit/')
+        self.phase_fit.save_h5py(f, prepend=prefix + 'phase_fit/')
+        self.cpsf.save_h5py(f, prepend=prefix + 'cpsf/')
+        self.gpf_fit.save_h5py(f, prepend=prefix + 'gpf_fit/')
 
     @classmethod
     def load(cls, filename, prepend=None):
@@ -213,12 +194,12 @@ class Config:
         sc.xspace = f[prefix + 'xspace'].value
         sc.yspace = f[prefix + 'yspace'].value
 
-        sc.phase_fit = FitZern.load_h5py(f, prepend=prefix+'phase_fit/')
+        sc.phase_fit = FitZern.load_h5py(f, prepend=prefix + 'phase_fit/')
         sc.phase_grid = sc.phase_fit.z
 
-        sc.cpsf = CPsf.load_h5py(f, prepend=prefix+'cpsf/')
+        sc.cpsf = CPsf.load_h5py(f, prepend=prefix + 'cpsf/')
 
-        sc.gpf_fit = FitZern.load_h5py(f, prepend=prefix+'gpf_fit/')
+        sc.gpf_fit = FitZern.load_h5py(f, prepend=prefix + 'gpf_fit/')
         sc.gpf_fit.z = sc.cpsf.czern
 
         print('phase: n_alpha = {}, N_alpha = {}'.format(
@@ -242,45 +223,61 @@ if __name__ == '__main__':
 
     parser.add_argument('cfgfile', help='Configuration file name.')
 
+    parser.add_argument('--wavelength',
+                        type=float,
+                        default=632.8e-9,
+                        help='Wavelength [m].')
+    parser.add_argument('--aperture-radius',
+                        type=float,
+                        default=0.002,
+                        help='Aperture radius [m].')
+    parser.add_argument('--focal-length',
+                        type=float,
+                        default=500e-3,
+                        help='Focal length [m].')
+    parser.add_argument('--pixel-size',
+                        type=float,
+                        default=7.4e-6,
+                        help='Pixel size [m].')
+    parser.add_argument('--image-width',
+                        type=int,
+                        default=33,
+                        help='Image width [#pixels].')
+    parser.add_argument('--image-height',
+                        type=int,
+                        default=35,
+                        help='Image height [#pixels].')
     parser.add_argument(
-        '--wavelength', type=float, default=632.8e-9,
-        help='Wavelength [m].')
-    parser.add_argument(
-        '--aperture-radius', type=float, default=0.002,
-        help='Aperture radius [m].')
-    parser.add_argument(
-        '--focal-length', type=float, default=500e-3,
-        help='Focal length [m].')
-    parser.add_argument(
-        '--pixel-size', type=float, default=7.4e-6,
-        help='Pixel size [m].')
-    parser.add_argument(
-        '--image-width', type=int, default=33,
-        help='Image width [#pixels].')
-    parser.add_argument(
-        '--image-height', type=int, default=35,
-        help='Image height [#pixels].')
-    parser.add_argument(
-        '--n-alpha', type=int, default=6,
+        '--n-alpha',
+        type=int,
+        default=6,
         metavar='N_ALPHA',
         help='Maximum radial order of the real-valued Zernike polynomials.')
     parser.add_argument(
-        '--n-beta', type=int, default=6,
+        '--n-beta',
+        type=int,
+        default=6,
         metavar='N_BETA',
         help='Maximum radial order of the complex-valued Zernike polynomials.')
-    parser.add_argument(
-        '--focus-positions', type=float, nargs='+',
-        default=[0.0, -2.216, 2.768],
-        metavar='FP', help='Defocus positions.')
-    parser.add_argument(
-        '--fit-L', type=int, default=20, metavar='L',
-        help='Grid size for the inner products.')
-    parser.add_argument(
-        '--fit-K', type=int, default=20, metavar='K',
-        help='Grid size for the inner products.')
-    parser.add_argument(
-        '--print', action='store_true',
-        help='Print a summary of a saved configuration file.')
+    parser.add_argument('--focus-positions',
+                        type=float,
+                        nargs='+',
+                        default=[0.0, -2.216, 2.768],
+                        metavar='FP',
+                        help='Defocus positions.')
+    parser.add_argument('--fit-L',
+                        type=int,
+                        default=20,
+                        metavar='L',
+                        help='Grid size for the inner products.')
+    parser.add_argument('--fit-K',
+                        type=int,
+                        default=20,
+                        metavar='K',
+                        help='Grid size for the inner products.')
+    parser.add_argument('--print',
+                        action='store_true',
+                        help='Print a summary of a saved configuration file.')
 
     args = parser.parse_args()
 

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import matplotlib.pyplot as p
+import numpy as np
 
 from enzpy.czernike import RZern
-
 """Example about using enzpy.
 
 Plot the first 10 real-valued Zernike polynomials.
@@ -14,7 +13,6 @@ Plot the first 10 real-valued Zernike polynomials.
 
 
 class PhasePlot:
-
     def __init__(self, n=6, L=200, K=250):
         # real-valued Zernike polynomials up to the n-th radial order
         rzern = RZern(n)
@@ -35,9 +33,11 @@ class PhasePlot:
         return Phi.reshape(self.grid_size, order='F')
 
     def plot_phase(self, Phi, interpolation=None, vmin=None, vmax=None):
-        p.imshow(
-            Phi, interpolation=interpolation, vmin=vmin, vmax=vmax,
-            origin='lower')
+        p.imshow(Phi,
+                 interpolation=interpolation,
+                 vmin=vmin,
+                 vmax=vmax,
+                 origin='lower')
         p.axis('off')
 
     def plot_alpha(self, alpha):
@@ -67,9 +67,8 @@ if __name__ == '__main__':
         # get n and m indices corresponding to the i-th coefficient
         n, m = phaseplot.rzern.noll2nm(i)
 
-        p.title(
-            r'$\mathcal{{Z}}_{{{}}}=\mathcal{{Z}}_{{{}}}^{{{}}}$'.format(
-                i, n, m))
+        p.title(r'$\mathcal{{Z}}_{{{}}}=\mathcal{{Z}}_{{{}}}^{{{}}}$'.format(
+            i, n, m))
 
     p.tight_layout()
     p.show()

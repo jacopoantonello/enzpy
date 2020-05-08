@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
-import math
-import numpy as np
-import matplotlib.pyplot as p
-import enzpy.enz as enz
 import argparse
+import math
+import sys
 
+import matplotlib.pyplot as p
+import numpy as np
 from numpy.linalg import norm
 from numpy.random import normal
 
+import enzpy.enz as enz
 from psf_plot import PSFPlot
-
 """Example about using enzpy.
 
 Plot the point-spread function that corresponds to a given complex-valued
@@ -29,20 +28,17 @@ References
 
 # handy object for plotting the PSF
 class BetaPlot:
-
     def __init__(self, args):
-        psfplot = PSFPlot(
-                wavelength=args.wavelength,
-                aperture_radius=args.aperture_radius,
-                focal_length=args.focal_length,
-                pixel_size=args.pixel_size,
-                image_width=args.image_width,
-                image_height=args.image_height,
-                fspace=np.linspace(
-                    args.defocus_interval[0],
-                    args.defocus_interval[1],
-                    args.defocus_step),
-                n_beta=args.n_beta)
+        psfplot = PSFPlot(wavelength=args.wavelength,
+                          aperture_radius=args.aperture_radius,
+                          focal_length=args.focal_length,
+                          pixel_size=args.pixel_size,
+                          image_width=args.image_width,
+                          image_height=args.image_height,
+                          fspace=np.linspace(args.defocus_interval[0],
+                                             args.defocus_interval[1],
+                                             args.defocus_step),
+                          n_beta=args.n_beta)
         self.psfplot = psfplot
 
     def plot_beta(self, beta):
@@ -52,7 +48,7 @@ class BetaPlot:
         cpsf = psfplot.cpsf
         czern = cpsf.czern
 
-        nn, mm = 2, math.ceil(psfplot.fspace.size//2)
+        nn, mm = 2, math.ceil(psfplot.fspace.size // 2)
         p.figure(1)
         p.clf()
 
@@ -92,54 +88,74 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='''Plot the point-spread function that corresponds to a
         given complex-valued Zernike analysis of the generalised pupil
-        function.''', epilog='''
+        function.''',
+        epilog='''
         Random beta coefficients: ./beta_abs.py --random.
         Astigmatism, 1 rms rad: ./beta_abs.py --nm 2 2 --rm 1.0.
         Trefoil: ./beta_abs.py --noll 9.
         ''',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    parser.add_argument('--wavelength',
+                        type=float,
+                        default=632.8e-9,
+                        help='Wavelength [m].')
+    parser.add_argument('--aperture-radius',
+                        type=float,
+                        default=0.002,
+                        help='Aperture radius [m].')
+    parser.add_argument('--focal-length',
+                        type=float,
+                        default=500e-3,
+                        help='Focal length [m].')
+    parser.add_argument('--image-width',
+                        type=int,
+                        default=75,
+                        help='Image width [#pixels].')
+    parser.add_argument('--image-height',
+                        type=int,
+                        default=151,
+                        help='Image height [#pixels].')
+    parser.add_argument('--pixel-size',
+                        type=float,
+                        default=7.4e-6,
+                        help='Pixel size [m].')
     parser.add_argument(
-        '--wavelength', type=float, default=632.8e-9,
-        help='Wavelength [m].')
-    parser.add_argument(
-        '--aperture-radius', type=float, default=0.002,
-        help='Aperture radius [m].')
-    parser.add_argument(
-        '--focal-length', type=float, default=500e-3, help='Focal length [m].')
-    parser.add_argument(
-        '--image-width', type=int, default=75, help='Image width [#pixels].')
-    parser.add_argument(
-        '--image-height', type=int, default=151,
-        help='Image height [#pixels].')
-    parser.add_argument(
-        '--pixel-size', type=float, default=7.4e-6, help='Pixel size [m].')
-    parser.add_argument(
-        '--n-beta', type=int, default=4,
+        '--n-beta',
+        type=int,
+        default=4,
         metavar='N_BETA',
         help='Maximum radial order of the complex-valued Zernike polynomials.')
+    parser.add_argument('--defocus-interval',
+                        type=float,
+                        nargs=2,
+                        default=[-3.0, 2.0],
+                        metavar=('MIN', 'MAX'),
+                        help='Range of the defocus parameter.')
+    parser.add_argument('--defocus-step',
+                        type=int,
+                        default=6,
+                        metavar='STEP',
+                        help='Step size of the defocus parameter.')
+    parser.add_argument('--nm',
+                        type=int,
+                        nargs=2,
+                        default=[-1, -1],
+                        metavar=('N', 'M'),
+                        help='Specify Zernike polynomial N_n^m using n and m.')
     parser.add_argument(
-        '--defocus-interval', type=float, nargs=2, default=[-3.0, 2.0],
-        metavar=('MIN', 'MAX'),
-        help='Range of the defocus parameter.')
-    parser.add_argument(
-        '--defocus-step', type=int, default=6,
-        metavar='STEP',
-        help='Step size of the defocus parameter.')
-    parser.add_argument(
-        '--nm', type=int, nargs=2, default=[-1, -1],
-        metavar=('N', 'M'),
-        help='Specify Zernike polynomial N_n^m using n and m.')
-    parser.add_argument(
-        '--noll', type=int, default=-1,
+        '--noll',
+        type=int,
+        default=-1,
         metavar='N_k',
         help="Specify Zernike polynomial N_k using Noll's index k.")
-    parser.add_argument(
-        '--rms', type=float, default=1.0,
-        help='Rms of the beta aberration.')
-    parser.add_argument(
-        '--random', action='store_true',
-        help='Make a random beta aberration.')
+    parser.add_argument('--rms',
+                        type=float,
+                        default=1.0,
+                        help='Rms of the beta aberration.')
+    parser.add_argument('--random',
+                        action='store_true',
+                        help='Make a random beta aberration.')
 
     args = parser.parse_args()
 
@@ -178,8 +194,8 @@ if __name__ == '__main__':
 
     # set the beta coefficients randomly
     if args.random:
-        beta = normal(size=beta.size) + 1j*normal(size=beta.size)
-        beta = (args.rms/norm(beta))*beta  # sort of
+        beta = normal(size=beta.size) + 1j * normal(size=beta.size)
+        beta = (args.rms / norm(beta)) * beta  # sort of
         beta[0] = 1
 
     # plot results

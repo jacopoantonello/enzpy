@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import matplotlib.pyplot as p
-
+import numpy as np
 from numpy.linalg import norm
 from numpy.random import normal
-from enzpy.czernike import CZern, FitZern
 
+from enzpy.czernike import CZern, FitZern
 """Example about using enzpy.
 
 Estimate a vector of complex-valued Zernike coefficients from a grid by taking
@@ -35,7 +34,7 @@ if __name__ == '__main__':
     gpf_pol.make_pol_grid(ip.rho_j, ip.theta_i)  # make a polar grid
 
     # random vector of Zernike coefficients to be estimated
-    beta_true = normal(size=gpf_pol.nk) + 1j*normal(size=gpf_pol.nk)
+    beta_true = normal(size=gpf_pol.nk) + 1j * normal(size=gpf_pol.nk)
 
     # random generalised pupil function P
     P = gpf_pol.eval_grid(beta_true)
@@ -50,8 +49,7 @@ if __name__ == '__main__':
     ax = p.subplot(3, 1, 1)
     h1 = ax.plot(range(1, gpf_pol.nk + 1), beta_true.real, marker='o')
     h2 = ax.plot(range(1, gpf_pol.nk + 1), beta_hat.real, marker='x')
-    p.legend(
-        h1 + h2, [r'$\mathcal{R}[\beta]$', r'$\mathcal{R}[\hat{\beta}]$'])
+    p.legend(h1 + h2, [r'$\mathcal{R}[\beta]$', r'$\mathcal{R}[\hat{\beta}]$'])
     p.ylabel('[rad]')
     p.xlabel('$k$')
 
@@ -59,8 +57,7 @@ if __name__ == '__main__':
     ax = p.subplot(3, 1, 2)
     h1 = ax.plot(range(1, gpf_pol.nk + 1), beta_true.imag, marker='o')
     h2 = ax.plot(range(1, gpf_pol.nk + 1), beta_hat.imag, marker='x')
-    p.legend(
-        h1 + h2, [r'$\mathcal{I}[\beta]$', r'$\mathcal{I}[\hat{\beta}]$'])
+    p.legend(h1 + h2, [r'$\mathcal{I}[\beta]$', r'$\mathcal{I}[\hat{\beta}]$'])
     p.ylabel('[rad]')
     p.xlabel('$k$')
 

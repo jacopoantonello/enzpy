@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# enzpy - Extended Nijboer-Zernike implementation for Python
-# Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
-#
 # This file is part of enzpy.
 #
 # enzpy is free software: you can redistribute it and/or modify
@@ -19,19 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with enzpy.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-
 from time import time
+
+import numpy as np
 from numpy.random import normal
 
 from enzpy import enz
 
 
 class OptSys:
-
     def __init__(self, cfg):
         self.cfg = cfg
-        assert(self.cfg.focus_positions[0] == 0.0)
+        assert (self.cfg.focus_positions[0] == 0.0)
 
         self.alpha_ab = np.zeros(self.cfg.phase_grid.nk)
         self.alpha_dm = np.zeros(self.cfg.phase_grid.nk)
@@ -74,7 +70,6 @@ class OptSys:
 
 
 class SimOptSys(OptSys):
-
     def __init__(self, cfg, sh_image_shape, u_size, noise_std=0.0):
         super().__init__(cfg)
 
@@ -90,7 +85,7 @@ class SimOptSys(OptSys):
 
         # TODO remove allocation
         phase_ab = self.cfg.phase_grid.eval_grid(self.alpha_ab)
-        gpf = np.exp(1j*phase_ab)
+        gpf = np.exp(1j * phase_ab)
 
         # save the beta corresponding to this alpha aberration
         self.beta_ab = self.cfg.gpf_fit.fit(gpf)
@@ -107,23 +102,29 @@ class SimOptSys(OptSys):
             # EXACT
             # compute the psf at the fi-th defocus, using beta_ab
             # the defocusing is included in the U_grid
-            psf = np.square(np.abs(self.cfg.cpsf.eval_grid_f(
-                self.beta_ab, fi, self.cfg.focus_positions[fi]))).reshape(
-                    self.cfg.image_height, self.cfg.image_width, order='F')
+            psf = np.square(
+                np.abs(
+                    self.cfg.cpsf.eval_grid_f(
+                        self.beta_ab, fi,
+                        self.cfg.focus_positions[fi]))).reshape(
+                            self.cfg.image_height,
+                            self.cfg.image_width,
+                            order='F')
         else:
             # APPROXIMATE
             # compute the residual aberration
             self.alpha_res[:] = self.alpha_ab + self.alpha_dm
 
             # eval the residual aberration
-            gpf = np.exp(1j*self.cfg.phase_grid.eval_grid(self.alpha_res))
+            gpf = np.exp(1j * self.cfg.phase_grid.eval_grid(self.alpha_res))
 
             # get the ENZ modes for the residual aberration
             self.beta_res = self.cfg.gpf_fit.fit(gpf)
 
             psf = np.square(np.abs(self.cfg.cpsf.eval_grid_f(
-                self.beta_res, 0))).reshape(
-                    self.cfg.image_height, self.cfg.image_width, order='F')
+                self.beta_res, 0))).reshape(self.cfg.image_height,
+                                            self.cfg.image_width,
+                                            order='F')
 
         # add noise
         if self.noise_std > 0.0:
@@ -136,7 +137,7 @@ class SimOptSys(OptSys):
             'alpha_res': self.alpha_res.copy(),
             'u_real': self.zeros_u,
             'ts': time()
-            }
+        }
 
     def apply_correction(self, beta_hat):
         super().apply_correction(beta_hat)
@@ -145,14 +146,15 @@ class SimOptSys(OptSys):
         self.alpha_res[:] = self.alpha_ab + self.alpha_dm
 
         # eval the residual aberration
-        gpf = np.exp(1j*self.cfg.phase_grid.eval_grid(self.alpha_res))
+        gpf = np.exp(1j * self.cfg.phase_grid.eval_grid(self.alpha_res))
 
         # get the ENZ modes for the residual aberration
         self.beta_res = self.cfg.gpf_fit.fit(gpf)
 
         psf = np.square(np.abs(self.cfg.cpsf.eval_grid_f(
-            self.beta_res, 0))).reshape(
-                self.cfg.image_height, self.cfg.image_width, order='F')
+            self.beta_res, 0))).reshape(self.cfg.image_height,
+                                        self.cfg.image_width,
+                                        order='F')
 
         # add noise
         if self.noise_std > 0.0:
@@ -164,4 +166,4 @@ class SimOptSys(OptSys):
             'alpha_res': self.alpha_res.copy(),
             'u_real': self.zeros_u,
             'ts': time(),
-            }
+        }

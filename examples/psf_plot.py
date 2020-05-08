@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import math
-import numpy as np
-import matplotlib.pyplot as p
-import enzpy.enz as enz
-
 from time import time
-from enzpy.enz import CPsf
 
+import matplotlib.pyplot as p
+import numpy as np
+
+import enzpy.enz as enz
+from enzpy.enz import CPsf
 """Example about using enzpy.
 
 Plots a diffraction-limited point-spread function at different defocus planes.
@@ -23,31 +23,29 @@ References
 
 
 class PSFPlot:
-
     def __init__(
             self,
-            wavelength=632.8e-9,    # wavelength in [m]
+            wavelength=632.8e-9,  # wavelength in [m]
             aperture_radius=0.002,  # aperture radius in [m]
-            focal_length=500e-3,    # focal length in [m]
-            pixel_size=7.4e-6,      # pixel size in [m]
-            image_width=75,         # [pixels], odd to get the origin as well
-            image_height=151,       # [pixels]
-            fspace=np.linspace(     # defocus planes specified by an array of
-                -3.0, 2.0, 6),      # defocus parameters
-            n_beta=4                # max radial order for the Zernikes
-            ):
+            focal_length=500e-3,  # focal length in [m]
+            pixel_size=7.4e-6,  # pixel size in [m]
+            image_width=75,  # [pixels], odd to get the origin as well
+            image_height=151,  # [pixels]
+            fspace=np.linspace(  # defocus planes specified by an array of
+                -3.0, 2.0, 6),  # defocus parameters
+            n_beta=4  # max radial order for the Zernikes
+    ):
 
         # compute the diffraction unit (lambda/NA)
-        fu = enz.get_field_unit(
-            wavelength=wavelength,
-            aperture_radius=aperture_radius,
-            exit_pupil_sphere_radius=focal_length)
+        fu = enz.get_field_unit(wavelength=wavelength,
+                                aperture_radius=aperture_radius,
+                                exit_pupil_sphere_radius=focal_length)
 
         def make_space(w, p, fu):
             if w % 2 == 0:
-                return np.linspace(-(w/2 - 0.5), w/2 - 0.5, w)*p/fu
+                return np.linspace(-(w / 2 - 0.5), w / 2 - 0.5, w) * p / fu
             else:
-                return np.linspace(-(w - 1)/2, (w - 1)/2, w)*p/fu
+                return np.linspace(-(w - 1) / 2, (w - 1) / 2, w) * p / fu
 
         # image side space
         xspace = make_space(image_width, pixel_size, fu)
@@ -79,9 +77,11 @@ class PSFPlot:
     def plot_psf(self, U, interpolation='nearest', vmin=None, vmax=None):
         # evaluate the modulus squared
         mypsf = np.square(np.abs(U))
-        p.imshow(
-            mypsf, interpolation=interpolation, vmin=vmin, vmax=vmax,
-            origin='lower')
+        p.imshow(mypsf,
+                 interpolation=interpolation,
+                 vmin=vmin,
+                 vmax=vmax,
+                 origin='lower')
         p.axis('off')
 
     def plot_beta_f(self, beta, fi):
@@ -97,11 +97,11 @@ if __name__ == '__main__':
     # beta (diffraction-limited), N_beta = cpsf.czern.nk
     beta = np.zeros(psfplot.cpsf.czern.nk, dtype=np.complex)
     beta[0] = 1.0
-    beta[5] = 1j*0.3
-    beta[6] = -1j*0.3
+    beta[5] = 1j * 0.3
+    beta[6] = -1j * 0.3
 
     # plot the results
-    nn, mm = 2, math.ceil(psfplot.fspace.size//2)
+    nn, mm = 2, math.ceil(psfplot.fspace.size // 2)
     p.figure(1)
 
     for fi, f in enumerate(psfplot.fspace):

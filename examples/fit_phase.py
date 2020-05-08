@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
 import matplotlib.pyplot as p
-
+import numpy as np
 from numpy.linalg import norm
 from numpy.random import normal
-from enzpy.czernike import RZern, FitZern
 
+from enzpy.czernike import FitZern, RZern
 from phase_plot import PhasePlot
-
 """Example about using enzpy.
 
 Estimate a vector of real-valued Zernike coefficients from a phase grid by

@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """Complex point-spread function using the Extended Nijboer-Zernike theory.
 
 """
 
-# enzpy - Extended Nijboer-Zernike implementation for Python
-# Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
-#
 # This file is part of enzpy.
 #
 # enzpy is free software: you can redistribute it and/or modify
@@ -23,14 +19,14 @@
 # You should have received a copy of the GNU General Public License
 # along with enzpy.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
-import h5py
-import math
 import cmath
+import math
+
+import h5py
+import numpy as np
 
 from enzpy._enz import vnmpocnp
 from enzpy.czernike import CZern
-
 
 __docformat__ = 'restructuredtext'
 HDF5_options = {
@@ -38,22 +34,23 @@ HDF5_options = {
     'shuffle': True,
     'fletcher32': True,
     'compression': 'gzip',
-    'compression_opts': 9}
+    'compression_opts': 9
+}
 
 
 def get_field_unit(wavelength, aperture_radius, exit_pupil_sphere_radius):
     """Compute the diffraction unit, i.e., `wavelength`/`NA`."""
-    return wavelength/(aperture_radius/exit_pupil_sphere_radius)
+    return wavelength / (aperture_radius / exit_pupil_sphere_radius)
 
 
 def get_focus_param(defocus):
     """Convert the Zernike `defocus` to the corresponding defocus parameter."""
-    return 2.0*math.sqrt(3.0)*defocus
+    return 2.0 * math.sqrt(3.0) * defocus
 
 
 def get_defocus(defocus_param):
     """Convert `defocus_param` to the corresponding Zernike defocus."""
-    return defocus_param/(2.0*math.sqrt(3.0))
+    return defocus_param / (2.0 * math.sqrt(3.0))
 
 
 class CPsf:
@@ -86,7 +83,6 @@ class CPsf:
         (2015). `url <http://dx.doi.org/10.1364/JOSAA.32.001160>`__.
 
     """
-
     def __init__(self, n_beta):
         r"""New `CPsf` with Zernike polynomials up to radial order `n_beta`.
 
@@ -247,21 +243,21 @@ class CPsf:
         U = complex(0.0)
         r = self._numpify(r, np.float)
         f = self._numpify(f, np.complex)
-        assert(r.size == 1)
-        assert(f.size == 1)
+        assert (r.size == 1)
+        assert (f.size == 1)
         n, m = np.array([0]), np.array([0])
         for i in range(self.czern.nk):
             n[0], m[0] = self.czern.ntab[i], self.czern.mtab[i]
             cf = self.czern.coefnorm[i]
-            U += complex(
-                beta[i]*cf*((1j)**m[0]) *
-                vnmpocnp(r, f, n, m)[0][0][0]*cmath.exp(1j*m[0]*phi))
-        return 2.0*U
+            U += complex(beta[i] * cf * ((1j)**m[0]) *
+                         vnmpocnp(r, f, n, m)[0][0][0] *
+                         cmath.exp(1j * m[0] * phi))
+        return 2.0 * U
 
     def _trim_r(self, r_sp, min_r):
         if np.abs(r_sp).min() < min_r:
             r_sp[np.abs(r_sp) <= min_r] = min_r
-            assert(np.abs(r_sp).min() >= min_r)
+            assert (np.abs(r_sp).min() >= min_r)
         return r_sp
 
     def make_cart_grid(self, x_sp=None, y_sp=None, f_sp=None, min_r=1e-9):
@@ -316,22 +312,24 @@ class CPsf:
         r_sp = self._trim_r(r_sp, min_r)
 
         ph_sp = np.arctan2(yy, xx).ravel(order='F')
-        Ugrid = np.zeros(
-            (x_sp.size, y_sp.size, f_sp.size, self.czern.nk),
-            order='F', dtype=np.complex)
+        Ugrid = np.zeros((x_sp.size, y_sp.size, f_sp.size, self.czern.nk),
+                         order='F',
+                         dtype=np.complex)
         Vnm = vnmpocnp(r_sp, f_sp, self.czern.ntab, self.czern.mtab)
-        assert(np.all(np.isfinite(Vnm)))
-        Cnm = np.zeros(
-            (ph_sp.size, self.czern.nk), order='F', dtype=np.complex)
+        assert (np.all(np.isfinite(Vnm)))
+        Cnm = np.zeros((ph_sp.size, self.czern.nk),
+                       order='F',
+                       dtype=np.complex)
         for k in range(self.czern.nk):
             m = self.czern.mtab[k]
-            Cnm[:, k] = 2.0*self.czern.coefnorm[k]*((1j)**m)*np.exp(1j*m*ph_sp)
+            Cnm[:, k] = 2.0 * self.czern.coefnorm[k] * (
+                (1j)**m) * np.exp(1j * m * ph_sp)
         for k in range(self.czern.nk):
             for f in range(f_sp.size):
                 Ugrid[:, :, f, k] = Vnm[:, f, k].reshape(
-                        (x_sp.size, y_sp.size), order='F')*Cnm[:, k].reshape(
-                                (x_sp.size, y_sp.size), order='F')
-        assert(np.all(np.isfinite(Ugrid)))
+                    (x_sp.size, y_sp.size), order='F') * Cnm[:, k].reshape(
+                        (x_sp.size, y_sp.size), order='F')
+        assert (np.all(np.isfinite(Ugrid)))
         self.Ugrid = Ugrid
         self.Vnm = Vnm
         self.Cnm = Cnm
@@ -384,21 +382,23 @@ class CPsf:
         # remove nans due to r = 0.0
         r_sp = self._trim_r(r_sp, min_r)
 
-        Ugrid = np.zeros(
-            (r_sp.size, ph_sp.size, f_sp.size, self.czern.nk), order='F',
-            dtype=np.complex)
+        Ugrid = np.zeros((r_sp.size, ph_sp.size, f_sp.size, self.czern.nk),
+                         order='F',
+                         dtype=np.complex)
         Vnm = vnmpocnp(r_sp, f_sp, self.czern.ntab, self.czern.mtab)
-        Cnm = np.zeros(
-            (ph_sp.size, self.czern.nk), order='F', dtype=np.complex)
+        Cnm = np.zeros((ph_sp.size, self.czern.nk),
+                       order='F',
+                       dtype=np.complex)
         for k in range(self.czern.nk):
             m = self.czern.mtab[k]
-            Cnm[:, k] = 2.0*self.czern.coefnorm[k]*((1j)**m)*np.exp(1j*m*ph_sp)
+            Cnm[:, k] = 2.0 * self.czern.coefnorm[k] * (
+                (1j)**m) * np.exp(1j * m * ph_sp)
         for k in range(self.czern.nk):
             for f in range(f_sp.size):
                 v = Vnm[:, f, k].reshape((Vnm.shape[0], 1))
                 c = Cnm[:, k].reshape((1, Cnm.shape[0]))
                 Ugrid[:, :, f, k] = np.kron(c, v)
-        assert(np.all(np.isfinite(Ugrid)))
+        assert (np.all(np.isfinite(Ugrid)))
         self.Ugrid = Ugrid
         self.Vnm = Vnm
         self.Cnm = Cnm
@@ -434,9 +434,8 @@ class CPsf:
             (2015). `url <http://dx.doi.org/10.1364/JOSAA.32.001160>`__.
 
         """
-        return np.dot(
-            self.Ugrid[i, j, f_k, :],
-            self._numpify(beta, np.complex))
+        return np.dot(self.Ugrid[i, j, f_k, :],
+                      self._numpify(beta, np.complex))
 
     def eval_grid_f(self, beta, f_k=0, const_phase=0.0):
         r"""Slice the complex point-spread function grid at defocus `f_k`.
@@ -556,14 +555,15 @@ class CPsf:
             (2015). `url <http://dx.doi.org/10.1364/JOSAA.32.001160>`__.
 
         """
-        return np.exp(-1j*const_phase)*(
-            np.dot(
-                self.Ugrid[:, :, f_k],
-                self._numpify(beta, np.complex)).ravel(order='F'))
+        return np.exp(-1j * const_phase) * (np.dot(
+            self.Ugrid[:, :, f_k], self._numpify(beta,
+                                                 np.complex)).ravel(order='F'))
 
-    def save(
-            self, filename, prepend=None,
-            params=HDF5_options, libver='latest'):
+    def save(self,
+             filename,
+             prepend=None,
+             params=HDF5_options,
+             libver='latest'):
         """Save object into an HDF5 file."""
         f = h5py.File(filename, 'w', libver=libver)
         self.save_h5py(f, prepend=prepend, params=params)

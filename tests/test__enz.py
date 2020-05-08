@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """ Extended Nijboer-Zernike toolbox.
 
 """
 
-# enzpy - Extended Nijboer-Zernike implementation for Python
-# Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
-#
 # This file is part of enzpy.
 #
 # enzpy is free software: you can redistribute it and/or modify
@@ -24,8 +20,8 @@
 # along with enzpy.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import h5py
 
+import h5py
 from numpy.linalg import norm
 
 from enzpy._enz import vnmpocnp
@@ -52,6 +48,7 @@ class Test__Enz(unittest.TestCase):
         self.assertTrue(out.shape[2] == n.size)
         err = norm((out - ref).ravel())
         self.assertTrue(err < self.max_enorm)
+
 
 if __name__ == '__main__':
     unittest.main()

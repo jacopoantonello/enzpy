@@ -1,23 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
-import numpy as np
 import argparse
-import matplotlib.pyplot as p
+import sys
 
-from numpy.random import normal
+import matplotlib.pyplot as p
+import numpy as np
 from numpy.linalg import norm
+from numpy.random import normal
 from PyQt5 import QtWidgets
 
-from enzpy.czernike import RZern, CZern, FitZern
-
 from beta_abs import BetaPlot
+from enzpy.czernike import CZern, FitZern, RZern
 from phase_plot import PhasePlot
 
 
 class Controls(QtWidgets.QWidget):
-
     def do_cmdline(self, unparsed):
         parser = argparse.ArgumentParser(
             description='''Plot the point-spread function that corresponds to
@@ -25,55 +23,72 @@ class Controls(QtWidgets.QWidget):
             function. The Zernike coefficients can be adjusted with a Qt
             widget.''',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument('--wavelength',
+                            type=float,
+                            default=632.8e-9,
+                            help='Wavelength [m].')
+        parser.add_argument('--aperture-radius',
+                            type=float,
+                            default=0.002,
+                            help='Aperture radius [m].')
+        parser.add_argument('--focal-length',
+                            type=float,
+                            default=500e-3,
+                            help='Focal length [m].')
+        parser.add_argument('--image-width',
+                            type=int,
+                            default=75,
+                            help='Image width [#pixels].')
+        parser.add_argument('--image-height',
+                            type=int,
+                            default=151,
+                            help='Image height [#pixels].')
+        parser.add_argument('--pixel-size',
+                            type=float,
+                            default=7.4e-6,
+                            help='Pixel size [m].')
         parser.add_argument(
-            '--wavelength', type=float, default=632.8e-9,
-            help='Wavelength [m].')
-        parser.add_argument(
-            '--aperture-radius', type=float, default=0.002,
-            help='Aperture radius [m].')
-        parser.add_argument(
-            '--focal-length', type=float, default=500e-3,
-            help='Focal length [m].')
-        parser.add_argument(
-            '--image-width', type=int, default=75,
-            help='Image width [#pixels].')
-        parser.add_argument(
-            '--image-height', type=int, default=151,
-            help='Image height [#pixels].')
-        parser.add_argument(
-            '--pixel-size', type=float, default=7.4e-6, help='Pixel size [m].')
-        parser.add_argument(
-            '--n-alpha', type=int, default=4,
+            '--n-alpha',
+            type=int,
+            default=4,
             metavar='N_ALPHA',
-            help=(
-                'Maximum radial order of the real-valued Zernike' +
-                'polynomials.'))
+            help=('Maximum radial order of the real-valued Zernike' +
+                  'polynomials.'))
         parser.add_argument(
-            '--n-beta', type=int, default=4,
+            '--n-beta',
+            type=int,
+            default=4,
             metavar='N_BETA',
-            help=(
-                'Maximum radial order of the complex-valued Zernike' +
-                'polynomials.'))
-        parser.add_argument(
-            '--defocus-interval', type=float, nargs=2, default=[-3.0, 2.0],
-            metavar=('MIN', 'MAX'),
-            help='Range of the defocus parameter.')
-        parser.add_argument(
-            '--defocus-step', type=int, default=6,
-            metavar='STEP',
-            help='Step size of the defocus parameter.')
-        parser.add_argument(
-            '--rms', type=float, default=1.0,
-            help='Rms of the beta aberration.')
-        parser.add_argument(
-            '--random', action='store_true',
-            help='Make a random beta aberration.')
-        parser.add_argument(
-            '--fit-L', type=int, default=95, metavar='L',
-            help='Grid size for the inner products.')
-        parser.add_argument(
-            '--fit-K', type=int, default=105, metavar='K',
-            help='Grid size for the inner products.')
+            help=('Maximum radial order of the complex-valued Zernike' +
+                  'polynomials.'))
+        parser.add_argument('--defocus-interval',
+                            type=float,
+                            nargs=2,
+                            default=[-3.0, 2.0],
+                            metavar=('MIN', 'MAX'),
+                            help='Range of the defocus parameter.')
+        parser.add_argument('--defocus-step',
+                            type=int,
+                            default=6,
+                            metavar='STEP',
+                            help='Step size of the defocus parameter.')
+        parser.add_argument('--rms',
+                            type=float,
+                            default=1.0,
+                            help='Rms of the beta aberration.')
+        parser.add_argument('--random',
+                            action='store_true',
+                            help='Make a random beta aberration.')
+        parser.add_argument('--fit-L',
+                            type=int,
+                            default=95,
+                            metavar='L',
+                            help='Grid size for the inner products.')
+        parser.add_argument('--fit-K',
+                            type=int,
+                            default=105,
+                            metavar='K',
+                            help='Grid size for the inner products.')
 
         self.args = parser.parse_args(unparsed[1:])
         return self.args
@@ -87,8 +102,8 @@ class Controls(QtWidgets.QWidget):
         grid = QtWidgets.QGridLayout()
 
         for i in range(alpha.size):
-            label = QtWidgets.QLabel(
-                '\U0001d4e9<sub>{}</sub>'.format(str(i + 1)))
+            label = QtWidgets.QLabel('\U0001d4e9<sub>{}</sub>'.format(
+                str(i + 1)))
             label.setStyleSheet('font: 12pt;')
             m = label.fontMetrics()
 
@@ -156,8 +171,8 @@ class Controls(QtWidgets.QWidget):
         edits1 = self.edits1
         alpha = self.alpha
 
-        alpha1 = normal(size=alpha.size-1)
-        alpha1 = (self.rms/norm(alpha1))*alpha1
+        alpha1 = normal(size=alpha.size - 1)
+        alpha1 = (self.rms / norm(alpha1)) * alpha1
         alpha[1:] = alpha1
         del alpha1
 
@@ -186,7 +201,7 @@ class Controls(QtWidgets.QWidget):
         Phi = self.phase_pol.eval_grid(self.alpha)
 
         # evaluate the generalised pupil function P corresponding to alpha
-        P = np.exp(1j*Phi)
+        P = np.exp(1j * Phi)
 
         # estimate the beta coefficients from P
         self.beta_hat = self.ip.fit(P)
@@ -212,8 +227,8 @@ class Controls(QtWidgets.QWidget):
 
         # set the alpha coefficients randomly
         if args.random:
-            alpha1 = normal(size=alpha.size-1)
-            alpha1 = (args.rms/norm(alpha1))*alpha1
+            alpha1 = normal(size=alpha.size - 1)
+            alpha1 = (args.rms / norm(alpha1)) * alpha1
             alpha[1:] = alpha1
             del alpha1
 

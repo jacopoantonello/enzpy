@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# enzpy - Extended Nijboer-Zernike implementation for Python
-# Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
-#
 # This file is part of enzpy.
 #
 # enzpy is free software: you can redistribute it and/or modify
@@ -20,40 +17,44 @@
 # along with enzpy.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
-import numpy as np
-import matplotlib.pyplot as p
-
 from time import time
+
+import matplotlib.pyplot as p
+import numpy as np
 from numpy.linalg import norm
 from numpy.random import normal
-
 from skimage.restoration import unwrap_phase
 
-from cvxopt import matrix
-
-from enzpl import ENZPL, mse
 from config import Config
+from cvxopt import matrix
+from enzpl import ENZPL, mse
 from optsys import SimOptSys
-
 
 parser = argparse.ArgumentParser(
     description='Run a single random aberration correction experiment.',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument(
-    'cfgfile', type=argparse.FileType('r'), help='configuration file')
-parser.add_argument(
-    '--pl-NmNbeta-ratio', type=float, default=10.0, metavar='P',
-    help='Use only the brightest P*N_beta of pixels for PL.')
-parser.add_argument(
-    '--rms', type=float, default=0.8, help='rms value of the aberration.')
-parser.add_argument(
-    '--pl-lmbd', type=float, default=1.0, help='Optimisation lambda.')
-parser.add_argument(
-    '--pl-solver', choices=['ENZPL', 'CustomENZPL'],
-    default='ENZPL', help='solver type')
+parser.add_argument('cfgfile',
+                    type=argparse.FileType('r'),
+                    help='configuration file')
+parser.add_argument('--pl-NmNbeta-ratio',
+                    type=float,
+                    default=10.0,
+                    metavar='P',
+                    help='Use only the brightest P*N_beta of pixels for PL.')
+parser.add_argument('--rms',
+                    type=float,
+                    default=0.8,
+                    help='rms value of the aberration.')
+parser.add_argument('--pl-lmbd',
+                    type=float,
+                    default=1.0,
+                    help='Optimisation lambda.')
+parser.add_argument('--pl-solver',
+                    choices=['ENZPL', 'CustomENZPL'],
+                    default='ENZPL',
+                    help='solver type')
 algorithms = ['enzpl', 'enzap', 'fftap']
-parser.add_argument(
-    '--alg', choices=algorithms, default=algorithms[0])
+parser.add_argument('--alg', choices=algorithms, default=algorithms[0])
 parser.add_argument('--plot-steps', action='store_true')
 
 args = parser.parse_args()
@@ -72,8 +73,8 @@ t1 = time()
 if args.pl_solver == 'ENZPL':
     spl = ENZPL.load(args.cfgfile)
 t2 = time()
-print('load {} from <{}> {:.6f}...'.format(
-    args.pl_solver, args.cfgfile, t2 - t1))
+print('load {} from <{}> {:.6f}...'.format(args.pl_solver, args.cfgfile,
+                                           t2 - t1))
 
 # instance simulation class (no Shack-Hartmann, no DM)
 optsys = SimOptSys(cfg, (2, 2), 17)
@@ -83,15 +84,15 @@ print('Run simulation')
 nk = cfg.phase_grid.nk
 alpha_true = np.zeros(nk)
 randn = normal(size=5)
-alpha_true[4:9] = (args.rms/norm(randn))*randn
+alpha_true[4:9] = (args.rms / norm(randn)) * randn
 
 # apply aberration
 optsys.set_alpha_ab(alpha_true)
 
-Ni = cfg.xspace.size*cfg.yspace.size
+Ni = cfg.xspace.size * cfg.yspace.size
 Nf = cfg.focus_positions.size
-mbi = matrix(0.0, (Ni*Nf, 1))
-mbi_sim = matrix(0.0, (Ni*Nf, 1))
+mbi = matrix(0.0, (Ni * Nf, 1))
+mbi_sim = matrix(0.0, (Ni * Nf, 1))
 mr = list()
 
 # loop through focus planes
@@ -105,8 +106,8 @@ for fi in range(Nf):
         cfg.focus_positions[fi],
         pr.min(),
         pr.max(),
-        ))
-    mbi[fi*Ni:(fi + 1)*Ni] = pr.ravel(order='F')
+    ))
+    mbi[fi * Ni:(fi + 1) * Ni] = pr.ravel(order='F')
     meas_list.append(pr.ravel(order='F'))
 
 
@@ -116,11 +117,11 @@ def parse_enz_solution(cfg, betak):
     else:
         gpf = cfg.cpsf.czern.eval_grid(betak)
     wrph = np.arctan2(gpf.imag, gpf.real)
-    wrph = np.mod(wrph, 2*np.pi) - np.pi
+    wrph = np.mod(wrph, 2 * np.pi) - np.pi
 
     ut1 = time()
-    unph = unwrap_phase(wrph.reshape(
-        (cfg.fit_L, cfg.fit_K), order='F')).ravel(order='F')
+    unph = unwrap_phase(wrph.reshape((cfg.fit_L, cfg.fit_K),
+                                     order='F')).ravel(order='F')
     ut2 = time()
 
     ft1 = time()
@@ -136,10 +137,11 @@ def enzpl():
     print('enzppl: lambda {:e} N_m/N_beta {:.4f}'.format(
         args.pl_lmbd, args.pl_NmNbeta_ratio))
     if args.pl_NmNbeta_ratio > 0.0:
-        spl.solve_brightest(
-            mbi, args.pl_lmbd,
-            NmNbeta_ratio=round(args.pl_NmNbeta_ratio*cfg.cpsf.czern.nk),
-            show_progress=True)
+        spl.solve_brightest(mbi,
+                            args.pl_lmbd,
+                            NmNbeta_ratio=round(args.pl_NmNbeta_ratio *
+                                                cfg.cpsf.czern.nk),
+                            show_progress=True)
     else:
         spl.solve_full(mbi, args.pl_lmbd, show_progress=True)
     beta_hat = np.array(spl.beta_hat).ravel()
@@ -155,7 +157,7 @@ def enzpl():
     print('enzppl: copt {0.real:e} {0.imag:+e}i'.format(copt))
     print('enzppl: msev {:e} '.format(msev))
     er = norm(alpha_true[1:] - alpha_hat[1:])
-    rer = er/norm(alpha_true[1:])
+    rer = er / norm(alpha_true[1:])
     print('enzppl: residual rms {:e} rer {:.3f}'.format(er, rer))
     print('enzppl: solver_time: {:.6f}'.format(spl.solver_time))
     print('enzppl: eig_time: {:.6f}'.format(spl.eig_time))
@@ -172,11 +174,8 @@ if args.alg == 'enzpl':
 cr = optsys.apply_correction(alpha_hat)
 
 pr = cr['psf']
-print('corr [{:.4f}, {:.4f}]'.format(
-    cfg.focus_positions[fi],
-    pr.min(),
-    pr.max()
-    ))
+print('corr [{:.4f}, {:.4f}]'.format(cfg.focus_positions[fi], pr.min(),
+                                     pr.max()))
 
 
 def plot_step(r):

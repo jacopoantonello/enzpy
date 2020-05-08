@@ -1,20 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import sys
-import numpy as np
 import argparse
-import matplotlib.pyplot as p
+import sys
 
-from numpy.random import normal
+import matplotlib.pyplot as p
+import numpy as np
 from numpy.linalg import norm
+from numpy.random import normal
 from PyQt5 import QtWidgets
 
 from beta_abs import BetaPlot
 
 
 class Controls(QtWidgets.QWidget):
-
     def do_cmdline(self, unparsed):
         parser = argparse.ArgumentParser(
             description='''Plot the point-spread function that corresponds to
@@ -22,43 +21,55 @@ class Controls(QtWidgets.QWidget):
             function. The Zernike coefficients can be adjusted with a Qt
             widget.''',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument('--wavelength',
+                            type=float,
+                            default=632.8e-9,
+                            help='Wavelength [m].')
+        parser.add_argument('--aperture-radius',
+                            type=float,
+                            default=0.002,
+                            help='Aperture radius [m].')
+        parser.add_argument('--focal-length',
+                            type=float,
+                            default=500e-3,
+                            help='Focal length [m].')
+        parser.add_argument('--image-width',
+                            type=int,
+                            default=75,
+                            help='Image width [#pixels].')
+        parser.add_argument('--image-height',
+                            type=int,
+                            default=151,
+                            help='Image height [#pixels].')
+        parser.add_argument('--pixel-size',
+                            type=float,
+                            default=7.4e-6,
+                            help='Pixel size [m].')
         parser.add_argument(
-            '--wavelength', type=float, default=632.8e-9,
-            help='Wavelength [m].')
-        parser.add_argument(
-            '--aperture-radius', type=float, default=0.002,
-            help='Aperture radius [m].')
-        parser.add_argument(
-            '--focal-length', type=float, default=500e-3,
-            help='Focal length [m].')
-        parser.add_argument(
-            '--image-width', type=int, default=75,
-            help='Image width [#pixels].')
-        parser.add_argument(
-            '--image-height', type=int, default=151,
-            help='Image height [#pixels].')
-        parser.add_argument(
-            '--pixel-size', type=float, default=7.4e-6, help='Pixel size [m].')
-        parser.add_argument(
-            '--n-beta', type=int, default=4,
+            '--n-beta',
+            type=int,
+            default=4,
             metavar='N_BETA',
-            help=(
-                'Maximum radial order of the complex-valued Zernike' +
-                'polynomials.'))
-        parser.add_argument(
-            '--defocus-interval', type=float, nargs=2, default=[-3.0, 2.0],
-            metavar=('MIN', 'MAX'),
-            help='Range of the defocus parameter.')
-        parser.add_argument(
-            '--defocus-step', type=int, default=6,
-            metavar='STEP',
-            help='Step size of the defocus parameter.')
-        parser.add_argument(
-            '--rms', type=float, default=1.0,
-            help='Rms of the beta aberration.')
-        parser.add_argument(
-            '--random', action='store_true',
-            help='Make a random beta aberration.')
+            help=('Maximum radial order of the complex-valued Zernike' +
+                  'polynomials.'))
+        parser.add_argument('--defocus-interval',
+                            type=float,
+                            nargs=2,
+                            default=[-3.0, 2.0],
+                            metavar=('MIN', 'MAX'),
+                            help='Range of the defocus parameter.')
+        parser.add_argument('--defocus-step',
+                            type=int,
+                            default=6,
+                            metavar='STEP',
+                            help='Step size of the defocus parameter.')
+        parser.add_argument('--rms',
+                            type=float,
+                            default=1.0,
+                            help='Rms of the beta aberration.')
+        parser.add_argument('--random',
+                            action='store_true',
+                            help='Make a random beta aberration.')
 
         self.args = parser.parse_args(unparsed[1:])
         return self.args
@@ -74,8 +85,8 @@ class Controls(QtWidgets.QWidget):
         grid = QtWidgets.QGridLayout()
 
         for i in range(beta.size):
-            label = QtWidgets.QLabel(
-                '\U0001d4dd<sub>{}</sub>'.format(str(i + 1)))
+            label = QtWidgets.QLabel('\U0001d4dd<sub>{}</sub>'.format(
+                str(i + 1)))
             label.setStyleSheet('font: 12pt;')
             m = label.fontMetrics()
 
@@ -119,7 +130,7 @@ class Controls(QtWidgets.QWidget):
         edits2 = self.edits2
         beta = self.beta
 
-        beta[:] = 0 + 1j*0
+        beta[:] = 0 + 1j * 0
         beta[0] = 1
 
         for i, b in enumerate(beta):
@@ -135,9 +146,8 @@ class Controls(QtWidgets.QWidget):
         edits2 = self.edits2
         beta = self.beta
 
-        beta = normal(
-            size=beta.size) + 1j*normal(size=beta.size)
-        beta = (self.rms/norm(beta))*beta  # sort of
+        beta = normal(size=beta.size) + 1j * normal(size=beta.size)
+        beta = (self.rms / norm(beta)) * beta  # sort of
         beta[0] = 1
 
         self.beta = beta
@@ -163,7 +173,7 @@ class Controls(QtWidgets.QWidget):
                 rl = 0.0
                 im = 0.0
 
-            beta[i] = rl + 1j*im
+            beta[i] = rl + 1j * im
             edits1[i].setText(str(rl))
             edits2[i].setText(str(im))
 
@@ -188,8 +198,8 @@ class Controls(QtWidgets.QWidget):
 
         # set the beta coefficients randomly
         if args.random:
-            beta = normal(size=beta.size) + 1j*normal(size=beta.size)
-            beta = (args.rms/norm(beta))*beta  # sort of
+            beta = normal(size=beta.size) + 1j * normal(size=beta.size)
+            beta = (args.rms / norm(beta)) * beta  # sort of
             beta[0] = 1
 
         self.rms = args.rms

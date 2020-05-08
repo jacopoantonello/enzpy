@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# enzpy - Extended Nijboer-Zernike implementation for Python
-# Copyright 2016-2018 J. Antonello <jacopo@antonello.org>
-#
 # This file is part of enzpy.
 #
 # enzpy is free software: you can redistribute it and/or modify
@@ -19,31 +16,30 @@
 # You should have received a copy of the GNU General Public License
 # along with enzpy.  If not, see <http://www.gnu.org/licenses/>.
 
-import numpy as np
 import math
-import h5py
-
 from time import time
+
+import h5py
+import numpy as np
 from scipy.optimize import fsolve
 
-from cvxopt import lapack, solvers, matrix, blas
-
 from config import Config
+from cvxopt import blas, lapack, matrix, solvers
 
 
 def eye(m):
     c = matrix(0.0, (m, m))
-    c[::m+1] = 1.0
+    c[::m + 1] = 1.0
     return c
 
 
 def kron(a, b):
     m, n = a.size
     p, q = b.size
-    c = matrix(float('nan'), (m*p, n*q))
+    c = matrix(float('nan'), (m * p, n * q))
     for i in range(m):
         for j in range(n):
-            c[i*p:(i + 1)*p, j*q:(j + 1)*q] = a[i, j]*b
+            c[i * p:(i + 1) * p, j * q:(j + 1) * q] = a[i, j] * b
     return c
 
 
@@ -60,16 +56,16 @@ def mse(x, xhat):
     c = xhat.real()
     d = xhat.imag()
 
-    k = (a.T*a + b.T*b)[0]
-    assert(k > 0.0)
+    k = (a.T * a + b.T * b)[0]
+    assert (k > 0.0)
     f = zeros(2, 1)
-    f[0] = -2*(a.T*c + b.T*d)
-    f[1] = -2*(-b.T*c + a.T*d)
+    f[0] = -2 * (a.T * c + b.T * d)
+    f[1] = -2 * (-b.T * c + a.T * d)
 
     def fw(l):
         w = [0.0, 0.0]
-        w[0] = -0.5*f[0]/(k + l)
-        w[1] = -0.5*f[1]/(k + l)
+        w[0] = -0.5 * f[0] / (k + l)
+        w[1] = -0.5 * f[1] / (k + l)
         return w
 
     def fphi(l):
@@ -78,20 +74,19 @@ def mse(x, xhat):
 
     lopt = fsolve(fphi, -k + 1e-7)
     wopt = fw(lopt)
-    copt = matrix(wopt[0][0] + 1j*wopt[1][0])
-    msev = (blas.nrm2(copt*x - xhat)**2)/(blas.nrm2(x)**2)
+    copt = matrix(wopt[0][0] + 1j * wopt[1][0])
+    msev = (blas.nrm2(copt * x - xhat)**2) / (blas.nrm2(x)**2)
     return copt[0], msev
 
 
 class ENZPL:
-
     def __init__(self):
         pass
 
     def setup(self, AA):
         Nb, Nm = AA.size
-        n_x1 = Nb*(Nb + 1)//2
-        n_x2 = Nb*(Nb - 1)//2
+        n_x1 = Nb * (Nb + 1) // 2
+        n_x2 = Nb * (Nb - 1) // 2
 
         print('make Di and Fi...', end='')
         Di = matrix(0.0, (Nb**2, Nm))
@@ -100,8 +95,8 @@ class ENZPL:
         for i in range(Nm):
             d = AA[:, i].real()
             f = AA[:, i].imag()
-            Di[:, i] = (d*d.T + f*f.T)[:]
-            Fi[:, i] = (f*d.T - d*f.T)[:]
+            Di[:, i] = (d * d.T + f * f.T)[:]
+            Fi[:, i] = (f * d.T - d * f.T)[:]
         t2 = time()
         print('{:.6f}'.format(t2 - t1))
 
@@ -114,14 +109,14 @@ class ENZPL:
         for c, ij in enumerate(idg):
             e = matrix(0.0, (Nb, 1))
             e[ij[0]] = 1.0
-            E = e*e.T
+            E = e * e.T
             E1[:, c] = E[:]
         for c, ij in enumerate(ilw):
             ei = matrix(0.0, (Nb, 1))
             ej = matrix(0.0, (Nb, 1))
             ei[ij[0]] = 1.0
             ej[ij[1]] = 1.0
-            E = ei*ej.T + ej*ei.T
+            E = ei * ej.T + ej * ei.T
             E1[:, Nb + c] = E[:]
         t2 = time()
         print('{:.6f}'.format(t2 - t1))
@@ -134,7 +129,7 @@ class ENZPL:
             ej = matrix(0.0, (Nb, 1))
             ei[ij[0]] = 1.0
             ej[ij[1]] = 1.0
-            E = ei*ej.T - ej*ei.T
+            E = ei * ej.T - ej * ei.T
             E2[:, c] = E[:]
         t2 = time()
         print('{:.6f}'.format(t2 - t1))
@@ -148,15 +143,17 @@ class ENZPL:
         # indeces S >= 0
         print('make indeces...', end='')
         t1 = time()
-        I11 = matrix([i + j*2*Nb for j in range(Nb) for i in range(Nb)])
-        I12 = matrix([i + (Nb + j)*2*Nb for j in range(Nb) for i in range(Nb)])
-        I21 = matrix([Nb + i + j*2*Nb for j in range(Nb) for i in range(Nb)])
+        I11 = matrix([i + j * 2 * Nb for j in range(Nb) for i in range(Nb)])
+        I12 = matrix(
+            [i + (Nb + j) * 2 * Nb for j in range(Nb) for i in range(Nb)])
+        I21 = matrix(
+            [Nb + i + j * 2 * Nb for j in range(Nb) for i in range(Nb)])
         I22 = matrix(
-            [Nb + i + (Nb + j)*2*Nb for j in range(Nb) for i in range(Nb)])
+            [Nb + i + (Nb + j) * 2 * Nb for j in range(Nb) for i in range(Nb)])
         t2 = time()
         print('{:.6f}'.format(t2 - t1))
 
-        dims = {'l': 0, 'q': [1 + Nm], 's': [2*Nb]}
+        dims = {'l': 0, 'q': [1 + Nm], 's': [2 * Nb]}
 
         # Gx + s = h (2nd order cones)
         print('make Gx + s = h...')
@@ -168,34 +165,34 @@ class ENZPL:
         # S21 = -E2x2, (Nb**2, 1)
         # S12 =  E2x2, (Nb**2, 1)
         # S22 = -E1x1, (Nb**2, 1)
-        Gtmp = matrix(0.0, ((2*Nb)**2, n_x1 + n_x2))
+        Gtmp = matrix(0.0, ((2 * Nb)**2, n_x1 + n_x2))
         # [ -E1   0  0  ]
         # [   0 -E2  0  ]
         # [   0  E2  0  ]
         # [ -E1   0  0  ]
-        Gtmp[0*(Nb**2):1*(Nb**2), :n_x1] = -E1
-        Gtmp[1*(Nb**2):2*(Nb**2), n_x1:n_x1 + n_x2] = -E2
-        Gtmp[2*(Nb**2):3*(Nb**2), n_x1:n_x1 + n_x2] = E2
-        Gtmp[3*(Nb**2):4*(Nb**2), :n_x1] = -E1
-        T1 = matrix(float('nan'), (2*Nb, 2*Nb))
+        Gtmp[0 * (Nb**2):1 * (Nb**2), :n_x1] = -E1
+        Gtmp[1 * (Nb**2):2 * (Nb**2), n_x1:n_x1 + n_x2] = -E2
+        Gtmp[2 * (Nb**2):3 * (Nb**2), n_x1:n_x1 + n_x2] = E2
+        Gtmp[3 * (Nb**2):4 * (Nb**2), :n_x1] = -E1
+        T1 = matrix(float('nan'), (2 * Nb, 2 * Nb))
         tt = matrix([1., 0.])
         bb = matrix([0., 1.])
         T11 = kron(eye(Nb), tt)
         T12 = kron(eye(Nb), bb)
-        T1[:2*Nb, :Nb] = T11
-        T1[:2*Nb, Nb:] = T12
+        T1[:2 * Nb, :Nb] = T11
+        T1[:2 * Nb, Nb:] = T12
         T = kron(
             kron(matrix([[1.0, 0.0], [0.0, 0.0]]), T1) +
             kron(matrix([[0.0, 0.0], [0.0, 1.0]]), T1), eye(Nb))
-        Gsdp = T*Gtmp
+        Gsdp = T * Gtmp
 
         # G
-        G = matrix(0.0, (1 + Nm + (2*Nb)**2, n_x))
+        G = matrix(0.0, (1 + Nm + (2 * Nb)**2, n_x))
         G[:1 + Nm, :1 + Nm] = G2oc
         G[1 + Nm:, 1 + Nm:] = Gsdp
 
         # h
-        h = matrix(0.0, (1 + Nm + (2*Nb)**2, 1))
+        h = matrix(0.0, (1 + Nm + (2 * Nb)**2, 1))
         # h[1:1 + Nm] = -d # load measurements
         t2 = time()
         print('make Gx + s = h {:.6f}'.format(t2 - t1))
@@ -206,15 +203,15 @@ class ENZPL:
         A11 = matrix(float('nan'), (Nm, n_x1))
         for i in range(Nm):
             for j in range(n_x1):
-                A11[i, j] = Di[:, i].T*E1[:, j]
-        assert(not math.isnan(sum(A11)))
+                A11[i, j] = Di[:, i].T * E1[:, j]
+        assert (not math.isnan(sum(A11)))
 
         # A12
         A12 = matrix(float('nan'), (Nm, n_x2))
         for i in range(Nm):
             for j in range(n_x2):
-                A12[i, j] = -Fi[:, i].T*E2[:, j]
-        assert(not math.isnan(sum(A12)))
+                A12[i, j] = -Fi[:, i].T * E2[:, j]
+        assert (not math.isnan(sum(A12)))
 
         A = matrix(0.0, (Nm, n_x))
         A[:, 1:1 + Nm] = eye(Nm)
@@ -241,10 +238,10 @@ class ENZPL:
         self.b = b
         self.dims = dims
 
-        self.sA = matrix(0.0 + 1j*0.0, (Nb, Nb))
+        self.sA = matrix(0.0 + 1j * 0.0, (Nb, Nb))
         self.sW = matrix(0.0, (Nb, 1))
-        self.sZ = matrix(0.0 + 1j*0.0, (Nb, Nb))
-        self.beta_hat = matrix(0.0 + 1j*0.0, (Nb, 1))
+        self.sZ = matrix(0.0 + 1j * 0.0, (Nb, Nb))
+        self.beta_hat = matrix(0.0 + 1j * 0.0, (Nb, 1))
 
     def save(self, filename, prepend=None, mode='r+', libver='latest'):
         """Save object into an HDF5 file."""
@@ -267,17 +264,12 @@ class ENZPL:
             'compression_opts': 9,
         }
 
-        f.create_dataset(
-            prefix + 'Nb',
-            data=np.array([self.Nb], dtype=np.int))
+        f.create_dataset(prefix + 'Nb', data=np.array([self.Nb], dtype=np.int))
 
-        f.create_dataset(
-            prefix + 'Nm',
-            data=np.array([self.Nm], dtype=np.int))
+        f.create_dataset(prefix + 'Nm', data=np.array([self.Nm], dtype=np.int))
 
-        f.create_dataset(
-            prefix + 'n_x',
-            data=np.array([self.n_x], dtype=np.int))
+        f.create_dataset(prefix + 'n_x',
+                         data=np.array([self.n_x], dtype=np.int))
 
         params['data'] = np.array(self.G)
         f.create_dataset(prefix + 'G', **params)
@@ -345,7 +337,7 @@ class ENZPL:
         sc.c = matrix(f[prefix + 'c'].value)
         sc.h = matrix(f[prefix + 'h'].value)
         sc.b = matrix(f[prefix + 'b'].value)
-        sc.dims = {'l': 0, 'q': [1 + sc.Nm], 's': [2*sc.Nb]}
+        sc.dims = {'l': 0, 'q': [1 + sc.Nm], 's': [2 * sc.Nb]}
         sc.sA = matrix(f[prefix + 'sA'].value)
         sc.sW = matrix(f[prefix + 'sW'].value)
         sc.sZ = matrix(f[prefix + 'sZ'].value)
@@ -367,18 +359,25 @@ class ENZPL:
         self.h[1:1 + self.Nm] = -bi
 
         t1 = time()
-        self.sol = solvers.conelp(
-            self.c, self.G, self.h, self.dims, self.A, self.b)
+        self.sol = solvers.conelp(self.c, self.G, self.h, self.dims, self.A,
+                                  self.b)
         t2 = time()
 
         t3 = time()
         if self.sol['status'] in ('optimal'):
             S = self.sol['s'][1 + self.Nm:]
-            self.sA[:] = S[self.I11] + 1j*S[self.I21]
-            lapack.heevr(
-                self.sA, self.sW, jobz='V', range='I', uplo='L',
-                vl=0.0, vu=0.0, il=self.Nb, iu=self.Nb, Z=self.sZ)
-            self.beta_hat[:] = math.sqrt(self.sW[0])*self.sZ[:, 0]
+            self.sA[:] = S[self.I11] + 1j * S[self.I21]
+            lapack.heevr(self.sA,
+                         self.sW,
+                         jobz='V',
+                         range='I',
+                         uplo='L',
+                         vl=0.0,
+                         vu=0.0,
+                         il=self.Nb,
+                         iu=self.Nb,
+                         Z=self.sZ)
+            self.beta_hat[:] = math.sqrt(self.sW[0]) * self.sZ[:, 0]
         else:
             raise RuntimeError('numerical problems')
         t4 = time()
@@ -406,19 +405,19 @@ class ENZPL:
         Nm2 = int(sum(linmap))
         self.Nm2 = Nm2
         self.linmap = linmap
-        n_x1 = self.Nb*(self.Nb + 1)//2
-        n_x2 = self.Nb*(self.Nb - 1)//2
+        n_x1 = self.Nb * (self.Nb + 1) // 2
+        n_x2 = self.Nb * (self.Nb - 1) // 2
         n_x = 1 + Nm2 + n_x1 + n_x2
 
         c = matrix(0.0, (1 + Nm2 + n_x1 + n_x2, 1))
         c[0] = 1.0
         c[1 + Nm2:1 + Nm2 + self.Nb] = lmbd
 
-        G = matrix(0.0, (1 + Nm2 + (2*self.Nb)**2, n_x))
+        G = matrix(0.0, (1 + Nm2 + (2 * self.Nb)**2, n_x))
         G[:1 + Nm2, :1 + Nm2] = -eye(1 + Nm2)
         G[1 + Nm2:, 1 + Nm2:] = self.G[1 + self.Nm:, 1 + self.Nm:]
 
-        h = matrix(0.0, (1 + Nm2 + (2*self.Nb)**2, 1))
+        h = matrix(0.0, (1 + Nm2 + (2 * self.Nb)**2, 1))
 
         A = matrix(0.0, (Nm2, n_x))
         lbi = matrix(0.0, (Nm2, 1))
@@ -430,11 +429,11 @@ class ENZPL:
                 lbi[pos] = bi[i]
                 h[1 + pos] = -bi[i]
                 pos += 1
-        assert(pos == Nm2)
+        assert (pos == Nm2)
 
         b = matrix(0.0, (Nm2, 1))
 
-        dims = {'l': 0, 'q': [1 + Nm2], 's': [2*self.Nb]}
+        dims = {'l': 0, 'q': [1 + Nm2], 's': [2 * self.Nb]}
 
         t1 = time()
         self.sol = solvers.conelp(c, G, h, dims, A, b)
@@ -452,11 +451,18 @@ class ENZPL:
         t3 = time()
         if self.sol['status'] in ('optimal', 'unknown'):
             S = self.sol['s'][1 + Nm2:]
-            self.sA[:] = S[self.I11] + 1j*S[self.I21]
-            lapack.heevr(
-                self.sA, self.sW, jobz='V', range='I', uplo='L',
-                vl=0.0, vu=0.0, il=self.Nb, iu=self.Nb, Z=self.sZ)
-            self.beta_hat[:] = math.sqrt(self.sW[0])*self.sZ[:, 0]
+            self.sA[:] = S[self.I11] + 1j * S[self.I21]
+            lapack.heevr(self.sA,
+                         self.sW,
+                         jobz='V',
+                         range='I',
+                         uplo='L',
+                         vl=0.0,
+                         vu=0.0,
+                         il=self.Nb,
+                         iu=self.Nb,
+                         Z=self.sZ)
+            self.beta_hat[:] = math.sqrt(self.sW[0]) * self.sZ[:, 0]
         else:
             raise RuntimeError('numerical problems')
         t4 = time()
@@ -473,11 +479,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Create ENZPL data for a given configuration file.',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        'cfgfile', type=argparse.FileType('r'), help='Configuration file')
-    parser.add_argument(
-        '--solver', choices=['ENZPL'],
-        default='ENZPL', help='Solver type')
+    parser.add_argument('cfgfile',
+                        type=argparse.FileType('r'),
+                        help='Configuration file')
+    parser.add_argument('--solver',
+                        choices=['ENZPL'],
+                        default='ENZPL',
+                        help='Solver type')
 
     args = parser.parse_args()
 
@@ -489,19 +497,18 @@ if __name__ == '__main__':
 
     # make mAi matrix
     Nb = cfg.cpsf.czern.nk
-    Ni = cfg.xspace.size*cfg.yspace.size
+    Ni = cfg.xspace.size * cfg.yspace.size
     Nf = cfg.focus_positions.size
     print('Nb = {}, Ni = {}, Nf = {}'.format(Nb, Ni, Nf))
-    print('xspace.size = {}, yspace.size = {}'.format(
-        cfg.xspace.size,
-        cfg.yspace.size))
-    mAi = matrix(0.0 + 1j*0.0, (Nb, Ni*Nf))
+    print('xspace.size = {}, yspace.size = {}'.format(cfg.xspace.size,
+                                                      cfg.yspace.size))
+    mAi = matrix(0.0 + 1j * 0.0, (Nb, Ni * Nf))
     for fi in range(Nf):
         fparam = cfg.focus_positions[fi]
-        fmul = exp(-1j*fparam)  # redundant
-        mAi[:, Ni*fi:Ni*(fi + 1)] = matrix(np.reshape(
-            fmul*cfg.cpsf.Ugrid[:, :, fi],
-            (Ni, Nb), order='F').transpose().conjugate())
+        fmul = exp(-1j * fparam)  # redundant
+        mAi[:, Ni * fi:Ni * (fi + 1)] = matrix(
+            np.reshape(fmul * cfg.cpsf.Ugrid[:, :, fi], (Ni, Nb),
+                       order='F').transpose().conjugate())
 
     spl = ENZPL()
     t1 = time()
@@ -513,5 +520,5 @@ if __name__ == '__main__':
     t1 = time()
     spl.save(args.cfgfile, mode='r+')
     t2 = time()
-    print('save {} into <{}> {:.6f}'.format(
-        args.solver, args.cfgfile, t2 - t1))
+    print('save {} into <{}> {:.6f}'.format(args.solver, args.cfgfile,
+                                            t2 - t1))

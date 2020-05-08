@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
-import numpy as np
-import matplotlib.pyplot as p
 import argparse
+import sys
 
+import matplotlib.pyplot as p
+import numpy as np
 from numpy.linalg import norm
 from numpy.random import normal
 
-from enzpy.czernike import RZern, CZern, FitZern
-
 from beta_abs import BetaPlot
+from enzpy.czernike import CZern, FitZern, RZern
 from phase_plot import PhasePlot
-
 """Example about using enzpy.
 
 Plot the point-spread function that corresponds to a given real-valued Zernike
@@ -27,70 +25,95 @@ References
 
 """
 
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
         description='''Plot the point-spread function that corresponds to a
         given real-valued Zernike analysis of the phase aberration
-        function.''', epilog='''
+        function.''',
+        epilog='''
         Random alpha coefficients: ./alpha_abs.py --random.
         Astigmatism, 1 rms rad: ./alpha_abs.py --nm 2 2 --rm 1.0.
         Trefoil: ./alpha_abs.py --noll 9.
         ''',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    parser.add_argument('--wavelength',
+                        type=float,
+                        default=632.8e-9,
+                        help='Wavelength [m].')
+    parser.add_argument('--aperture-radius',
+                        type=float,
+                        default=0.002,
+                        help='Aperture radius [m].')
+    parser.add_argument('--focal-length',
+                        type=float,
+                        default=500e-3,
+                        help='Focal length [m].')
+    parser.add_argument('--image-width',
+                        type=int,
+                        default=75,
+                        help='Image width [#pixels].')
+    parser.add_argument('--image-height',
+                        type=int,
+                        default=151,
+                        help='Image height [#pixels].')
+    parser.add_argument('--pixel-size',
+                        type=float,
+                        default=7.4e-6,
+                        help='Pixel size [m].')
     parser.add_argument(
-        '--wavelength', type=float, default=632.8e-9,
-        help='Wavelength [m].')
-    parser.add_argument(
-        '--aperture-radius', type=float, default=0.002,
-        help='Aperture radius [m].')
-    parser.add_argument(
-        '--focal-length', type=float, default=500e-3, help='Focal length [m].')
-    parser.add_argument(
-        '--image-width', type=int, default=75, help='Image width [#pixels].')
-    parser.add_argument(
-        '--image-height', type=int, default=151,
-        help='Image height [#pixels].')
-    parser.add_argument(
-        '--pixel-size', type=float, default=7.4e-6, help='Pixel size [m].')
-    parser.add_argument(
-        '--n-alpha', type=int, default=4,
+        '--n-alpha',
+        type=int,
+        default=4,
         metavar='N_ALPHA',
         help='Maximum radial order of the real-valued Zernike polynomials.')
     parser.add_argument(
-        '--n-beta', type=int, default=4,
+        '--n-beta',
+        type=int,
+        default=4,
         metavar='N_BETA',
         help='Maximum radial order of the complex-valued Zernike polynomials.')
+    parser.add_argument('--defocus-interval',
+                        type=float,
+                        nargs=2,
+                        default=[-3.0, 2.0],
+                        metavar=('MIN', 'MAX'),
+                        help='Range of the defocus parameter.')
+    parser.add_argument('--defocus-step',
+                        type=int,
+                        default=6,
+                        metavar='STEP',
+                        help='Step size of the defocus parameter.')
+    parser.add_argument('--nm',
+                        type=int,
+                        nargs=2,
+                        default=[-1, -1],
+                        metavar=('N', 'M'),
+                        help='Specify Zernike polynomial N_n^m using n and m.')
     parser.add_argument(
-        '--defocus-interval', type=float, nargs=2, default=[-3.0, 2.0],
-        metavar=('MIN', 'MAX'),
-        help='Range of the defocus parameter.')
-    parser.add_argument(
-        '--defocus-step', type=int, default=6,
-        metavar='STEP',
-        help='Step size of the defocus parameter.')
-    parser.add_argument(
-        '--nm', type=int, nargs=2, default=[-1, -1],
-        metavar=('N', 'M'),
-        help='Specify Zernike polynomial N_n^m using n and m.')
-    parser.add_argument(
-        '--noll', type=int, default=-1,
+        '--noll',
+        type=int,
+        default=-1,
         metavar='N_k',
         help="Specify Zernike polynomial N_k using Noll's index k.")
-    parser.add_argument(
-        '--rms', type=float, default=1.0,
-        help='Rms of the alpha aberration.')
-    parser.add_argument(
-        '--random', action='store_true',
-        help='Make a random alpha aberration.')
-    parser.add_argument(
-        '--fit-L', type=int, default=95, metavar='L',
-        help='Grid size for the inner products.')
-    parser.add_argument(
-        '--fit-K', type=int, default=105, metavar='K',
-        help='Grid size for the inner products.')
+    parser.add_argument('--rms',
+                        type=float,
+                        default=1.0,
+                        help='Rms of the alpha aberration.')
+    parser.add_argument('--random',
+                        action='store_true',
+                        help='Make a random alpha aberration.')
+    parser.add_argument('--fit-L',
+                        type=int,
+                        default=95,
+                        metavar='L',
+                        help='Grid size for the inner products.')
+    parser.add_argument('--fit-K',
+                        type=int,
+                        default=105,
+                        metavar='K',
+                        help='Grid size for the inner products.')
 
     args = parser.parse_args()
 
@@ -129,8 +152,8 @@ if __name__ == '__main__':
 
     # set the alpha coefficients randomly
     if args.random:
-        alpha1 = normal(size=alpha.size-1)
-        alpha1 = (args.rms/norm(alpha1))*alpha1
+        alpha1 = normal(size=alpha.size - 1)
+        alpha1 = (args.rms / norm(alpha1)) * alpha1
         alpha[1:] = alpha1
         del alpha1
 
@@ -138,7 +161,7 @@ if __name__ == '__main__':
     Phi = phase_pol.eval_grid(alpha)
 
     # evaluate the generalised pupil function P corresponding to alpha
-    P = np.exp(1j*Phi)
+    P = np.exp(1j * Phi)
 
     # estimate the beta coefficients from P
     beta_hat = ip.fit(P)
