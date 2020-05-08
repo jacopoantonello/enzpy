@@ -38,7 +38,7 @@ complex-valued Zernike polynomials, see [[4]](#4).
 
 ### Linux
 
-Make sure you have installed the packages in `Requirements`_.
+Make sure you have installed the packages in requirements.
 
 ```bash
 git clone https://github.com/jacopoantonello/enzpy.git
@@ -49,9 +49,9 @@ sudo python setup.py install
 
 ### Mac OS X
 
-The easiest way to use this toolbox is to install `Anaconda
-<http://continuum.io/downloads>`__ for Python 3, which includes all the
-necessary packages in `Requirements`_, except for PyQt5 and CVXOPT. Once you
+The easiest way to use this toolbox is to install
+[Anaconda](http://continuum.io/downloads) for Python 3, which includes all the
+necessary packages in requirements, except for PyQt5 and CVXOPT. Once you
 have installed Anaconda, create an environment:
 
 ```bash
@@ -78,8 +78,7 @@ This toolbox *does not support* in Windows.
 
 ## Examples
 
-After installing `enzpy`, you can run the examples located in `examples/`
-(some screenshots are `here <http://www.antonello.org/code.php>`__):
+After installing `enzpy`, you can run the examples located in `examples/`:
 
 * `through_focus_intensity.py` is taken from [[1]](#1), and computes the
   intensity as a function of the radial coordinate and the defocus parameter.
