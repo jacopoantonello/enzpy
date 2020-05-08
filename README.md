@@ -24,17 +24,14 @@ complex-valued Zernike polynomials, see [[4]](#4).
 
 ## Requirements
 
-* `Python 3 <https://www.python.org>`__
-* `pthreads
-  <http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/pthread.h.html>`__
+* [Python 3](https://www.python.org)
+* [pthreads](http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/pthread.h.html)
   (tested on Linux and Mac OS X Yosemite)
-* `Numpy <http://www.numpy.org/>`__
-* `h5py <http://www.h5py.org/>`__
-* [optional] `matplotlib <http://matplotlib.org/>`__
-* [optional] `PyQt5
-  <http://www.riverbankcomputing.com/software/pyqt/download5>`__
-* [optional] `CVXOPT
-  <http://cvxopt.org>`__
+* [Numpy](http://www.numpy.org)
+* [h5py](http://www.h5py.org)
+* [optional] [matplotlib](http://matplotlib.org)
+* [optional] [PyQt5](http://www.riverbankcomputing.com/software/pyqt/download5)
+* [optional] [CVXOPT](http://cvxopt.org)
 
 
 ## Installation
