@@ -3,7 +3,6 @@
 [![DOI](https://img.shields.io/badge/DOI-10.1364%2FJOSAA.32.001160-blue)](http://dx.doi.org/10.1364/JOSAA.32.001160)
 
 Implementation of the extended Nijboer-Zernike (**ENZ**) theory for Python.
-
 This toolbox can be used to compute the point-spread function (**PSF**) using
 the scalar **ENZ** theory, see [[1]](#1), [[2]](#2), and [[3]](#3). It contains
 code to fit the phase and the generalised pupil function using real- and
@@ -73,7 +72,7 @@ PyQt5 is necessary to run the examples with a graphical interface:
 
 ### Windows
 
-This toolbox *does not support* in Windows.
+This toolbox **does not support** Windows.
 
 
 ## Examples
